@@ -14,20 +14,22 @@ const MealPlanCard = memo(({ slot, data }) => {
   const Icon = ICONS[slot] || UtensilsCrossed;
   if (!data) return null;
   return (
-    <article className="rounded-2xl border bg-card p-5 shadow-sm hover:shadow-md transition-shadow">
-      <header className="flex items-center gap-2 mb-3">
-        <div className="h-9 w-9 rounded-xl bg-safe-soft text-safe grid place-items-center">
-          <Icon className="h-4 w-4" />
+    <article className="bg-card rounded-xl border border-border p-5 hover:border-primary/40 hover:shadow-sm transition">
+      <header className="flex items-center gap-3 mb-3">
+        <div className="w-10 h-10 rounded-lg bg-safe-soft text-safe-text grid place-items-center">
+          <Icon className="h-5 w-5" />
         </div>
         <div>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">{slot}</p>
-          <h3 className="font-semibold leading-tight">{data.meal}</h3>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">{slot}</p>
+          <h3 className="font-display font-bold leading-tight text-foreground">{data.meal}</h3>
         </div>
       </header>
       {data.foods?.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-3">
+        <div className="flex flex-wrap gap-2 mb-3">
           {data.foods.map((f) => (
-            <FoodTag key={f} variant="safe">{f}</FoodTag>
+            <span key={f} className="text-xs px-2.5 py-1 rounded-full bg-safe-soft text-safe-text border border-safe/30 capitalize font-medium">
+              {f}
+            </span>
           ))}
         </div>
       )}
