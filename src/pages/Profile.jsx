@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { toast } from "sonner";
-import { User } from "lucide-react";
 import { db, isFirebaseConfigured } from "../services/firebase";
 import { useAuth } from "../context/AuthContext";
 import { useHealth } from "../context/HealthContext";
@@ -57,59 +56,60 @@ const Profile = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-6 max-w-3xl">
       <header>
-        <h1 className="text-2xl font-semibold flex items-center gap-2">
-          <User className="h-6 w-6 text-primary" /> Profile
-        </h1>
+        <h1 className="text-2xl font-display font-bold text-foreground">Profile</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Personal details help generate safer meal plans.
         </p>
       </header>
 
-      <section className="rounded-2xl border bg-card p-6 shadow-sm">
+      <section className="bg-card rounded-xl border border-border p-5">
         <div className="flex items-center gap-4 mb-6">
-          <div className="h-14 w-14 rounded-2xl bg-primary text-primary-foreground grid place-items-center text-lg font-semibold">
+          <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground grid place-items-center font-display font-bold text-lg">
             {initials(form.name || user?.email)}
           </div>
           <div>
-            <p className="font-semibold">{form.name || "Unnamed user"}</p>
+            <p className="font-display font-bold text-foreground">{form.name || "Unnamed user"}</p>
             <p className="text-sm text-muted-foreground">{user?.email || "Not signed in"}</p>
           </div>
         </div>
 
-        <form onSubmit={save} className="grid gap-4 md:grid-cols-2">
-          <Field label="Full name">
-            <input value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="input" />
-          </Field>
-          <Field label="Age">
-            <input type="number" min="0" value={form.age}
-              onChange={(e) => setForm({ ...form, age: e.target.value })}
-              className="input" />
-          </Field>
-          <Field label="Allergies (comma separated)" full>
+        <form onSubmit={save} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Full name</label>
+              <input value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })} className="input" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Age</label>
+              <input type="number" min="0" value={form.age}
+                onChange={(e) => setForm({ ...form, age: e.target.value })} className="input" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">
+              Allergies <span className="text-muted-foreground font-normal">(comma separated)</span>
+            </label>
             <input value={form.allergies}
               onChange={(e) => setForm({ ...form, allergies: e.target.value })}
               placeholder="peanuts, lactose…" className="input" />
-          </Field>
-          <Field label="Medical history" full>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Medical history</label>
             <textarea rows={4} value={form.medicalHistory}
               onChange={(e) => setForm({ ...form, medicalHistory: e.target.value })}
               className="input resize-none" />
-          </Field>
-
-          <div className="md:col-span-2 flex justify-end">
-            <button type="submit" disabled={busy}
-              className="rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-medium hover:opacity-90 transition disabled:opacity-50">
-              {busy ? "Saving…" : "Save profile"}
-            </button>
           </div>
+
+          <button type="submit" disabled={busy} className="w-full btn-primary py-2.5">
+            {busy ? "Saving…" : "Save profile"}
+          </button>
         </form>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2">
+      <section className="grid gap-4 sm:grid-cols-2">
         <ListCard title="Active medicines" items={medicines.map((m) => m.medicine)} empty="No medicines yet." />
         <ListCard title="Active conditions" items={conditions.map((c) => c.condition)} empty="No conditions yet." />
       </section>
@@ -117,21 +117,14 @@ const Profile = () => {
   );
 };
 
-const Field = ({ label, children, full }) => (
-  <label className={`block ${full ? "md:col-span-2" : ""}`}>
-    <span className="text-sm font-medium">{label}</span>
-    <div className="mt-1">{children}</div>
-  </label>
-);
-
 const ListCard = ({ title, items, empty }) => (
-  <div className="rounded-2xl border bg-card p-5">
-    <h3 className="font-semibold mb-3">{title}</h3>
+  <div className="bg-card rounded-xl border border-border p-5">
+    <h3 className="font-display font-bold text-foreground mb-3">{title}</h3>
     {items.length === 0 ? (
-      <p className="text-sm text-muted-foreground">{empty}</p>
+      <p className="text-sm text-slate-400">{empty}</p>
     ) : (
       <ul className="space-y-1.5">
-        {items.map((i) => <li key={i} className="text-sm">• {i}</li>)}
+        {items.map((i) => <li key={i} className="text-sm text-muted-foreground capitalize">• {i}</li>)}
       </ul>
     )}
   </div>
