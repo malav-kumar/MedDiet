@@ -6,14 +6,15 @@ import {
 import {
   subscribeActiveConditions, setActiveCondition, removeActiveCondition,
 } from "../services/conditionService";
+import { getTodayMealPlan, saveMealPlan } from "../services/mealService";
 
 const HealthContext = createContext(null);
 
-/** Aggregates a user's active medicines + conditions and exposes CRUD. */
 export const HealthProvider = ({ children }) => {
   const { user } = useAuth();
   const [medicines, setMedicines] = useState([]);
   const [conditions, setConditions] = useState([]);
+  const [savedMeal, setSavedMeal] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -23,10 +24,11 @@ export const HealthProvider = ({ children }) => {
     }
     const u1 = subscribeActiveMedicines(user.uid, setMedicines);
     const u2 = subscribeActiveConditions(user.uid, setConditions);
+    // Load saved meal plan on login
+    getTodayMealPlan(user.uid).then((plan) => { if (plan) setSavedMeal(plan); }).catch(() => {});
     return () => { u1 && u1(); u2 && u2(); };
   }, [user]);
 
-  /** Combined food rules across all active items, deduplicated. */
   const combinedRules = useMemo(() => {
     const dedupe = (arr) => Array.from(new Set(arr.filter(Boolean)));
     const safe = dedupe([
@@ -49,6 +51,11 @@ export const HealthProvider = ({ children }) => {
     removeMedicine: (id) => removeActiveMedicine(user?.uid, id),
     addCondition: (c) => setActiveCondition(user?.uid, c),
     removeCondition: (id) => removeActiveCondition(user?.uid, id),
+    savedMeal,
+    saveMealToDashboard: async (plan) => {
+      if (user?.uid) await saveMealPlan(user.uid, plan);
+      setSavedMeal(plan);
+    },
   };
 
   return <HealthContext.Provider value={value}>{children}</HealthContext.Provider>;

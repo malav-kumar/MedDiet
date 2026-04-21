@@ -35,6 +35,8 @@ const Profile = () => {
 
   const save = async (e) => {
     e.preventDefault();
+    if (!form.name.trim()) { toast.error("Full name is required."); return; }
+    if (!form.age || Number(form.age) <= 0) { toast.error("A valid age is required."); return; }
     if (!user || !isFirebaseConfigured) {
       toast.error("Sign in to save your profile.");
       return;
@@ -78,28 +80,50 @@ const Profile = () => {
         <form onSubmit={save} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Full name</label>
-              <input value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })} className="input" />
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Full name <span className="text-red-500">*</span>
+              </label>
+              <input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Your full name"
+                required
+                className="input" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Age</label>
-              <input type="number" min="0" value={form.age}
-                onChange={(e) => setForm({ ...form, age: e.target.value })} className="input" />
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Age <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number" min="1" max="120"
+                value={form.age}
+                onChange={(e) => setForm({ ...form, age: e.target.value })}
+                placeholder="Your age"
+                required
+                className="input" />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-foreground mb-1.5">
-              Allergies <span className="text-muted-foreground font-normal">(comma separated)</span>
+              Allergies{" "}
+              <span className="text-muted-foreground font-normal">(optional, comma separated)</span>
             </label>
-            <input value={form.allergies}
+            <input
+              value={form.allergies}
               onChange={(e) => setForm({ ...form, allergies: e.target.value })}
-              placeholder="peanuts, lactose…" className="input" />
+              placeholder="peanuts, lactose… (optional)"
+              className="input" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">Medical history</label>
-            <textarea rows={4} value={form.medicalHistory}
+            <label className="block text-sm font-medium text-foreground mb-1.5">
+              Medical history{" "}
+              <span className="text-muted-foreground font-normal">(optional)</span>
+            </label>
+            <textarea
+              rows={4}
+              value={form.medicalHistory}
               onChange={(e) => setForm({ ...form, medicalHistory: e.target.value })}
+              placeholder="Any relevant medical history… (optional)"
               className="input resize-none" />
           </div>
 

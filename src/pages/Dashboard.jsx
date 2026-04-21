@@ -1,4 +1,4 @@
-import { Pill, HeartPulse, Salad, User } from "lucide-react";
+import { Pill, HeartPulse, Salad, User, Coffee, UtensilsCrossed, Soup, Cookie } from "lucide-react";
 import { Link } from "react-router-dom";
 import QuickActionCard from "../components/QuickActionCard";
 import AlertBanner from "../components/AlertBanner";
@@ -7,8 +7,11 @@ import { useHealth } from "../context/HealthContext";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { medicines, conditions, combinedRules } = useHealth();
+  const { medicines, conditions, combinedRules, savedMeal } = useHealth();
   const name = user?.displayName || user?.email?.split("@")[0] || "there";
+
+  const SLOTS = ["breakfast", "lunch", "dinner", "snacks"];
+  const SLOT_ICONS = { breakfast: Coffee, lunch: UtensilsCrossed, dinner: Soup, snacks: Cookie };
 
   return (
     <div className="space-y-6">
@@ -30,7 +33,7 @@ const Dashboard = () => {
 
       {/* Stats row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <StatCard label="Meal Plans" value="0" />
+        <StatCard label="Meal Plans" value={savedMeal ? "1" : "0"} />
         <PillStatCard
           label="Active Medicines"
           items={medicines.map((m) => m.medicine)}
@@ -43,15 +46,62 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Today's plan empty state */}
-      <section className="bg-card rounded-xl border border-dashed border-input p-8 text-center">
-        <div className="text-4xl mb-2" aria-hidden>🍽️</div>
-        <h3 className="font-display font-bold text-foreground">No meal plan for today</h3>
-        <p className="text-sm text-muted-foreground mt-1 mb-4">
-          Generate a personalised plan based on your active items.
-        </p>
-        <Link to="/meals" className="inline-flex btn-primary">Generate Meal Plan</Link>
-      </section>
+      {/* Today's meal plan */}
+      {savedMeal ? (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Today's Meal Plan
+            </p>
+            <Link to="/meals" className="text-xs text-primary font-semibold hover:underline">
+              Edit →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {SLOTS.map((slot) => {
+              const data = savedMeal[slot];
+              if (!data) return null;
+              const Icon = SLOT_ICONS[slot];
+              return (
+                <div key={slot} className="bg-card rounded-xl border border-border p-4 hover:border-primary/40 hover:shadow-sm transition">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-9 h-9 rounded-lg bg-safe-soft text-safe-text grid place-items-center shrink-0">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">{slot}</p>
+                      <p className="font-display font-bold text-sm leading-tight text-foreground">{data.meal}</p>
+                    </div>
+                  </div>
+                  {data.foods?.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {data.foods.slice(0, 4).map((f) => (
+                        <span key={f} className="text-xs px-2 py-0.5 rounded-full bg-safe-soft text-safe-text border border-safe/30 capitalize font-medium">
+                          {f}
+                        </span>
+                      ))}
+                      {data.foods.length > 4 && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground font-medium">
+                          +{data.foods.length - 4}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ) : (
+        <section className="bg-card rounded-xl border border-dashed border-input p-8 text-center">
+          <div className="text-4xl mb-2" aria-hidden>🍽️</div>
+          <h3 className="font-display font-bold text-foreground">No meal plan for today</h3>
+          <p className="text-sm text-muted-foreground mt-1 mb-4">
+            Generate a personalised plan based on your active items.
+          </p>
+          <Link to="/meals" className="inline-flex btn-primary">Generate Meal Plan</Link>
+        </section>
+      )}
 
       {/* Quick actions */}
       <section>

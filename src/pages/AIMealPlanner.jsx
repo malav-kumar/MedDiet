@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sparkles, Loader2, Droplets, RefreshCw } from "lucide-react";
+import { Sparkles, Loader2, Droplets, RefreshCw, BookmarkCheck } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "../services/firebase";
 import { useAuth } from "../context/AuthContext";
@@ -13,8 +13,9 @@ const SLOTS = ["breakfast", "lunch", "dinner", "snacks"];
 
 const AIMealPlanner = () => {
   const { user } = useAuth();
-  const { medicines, conditions } = useHealth();
+  const { medicines, conditions, saveMealToDashboard, savedMeal } = useHealth();
   const [allergies, setAllergies] = useState([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!isFirebaseConfigured || !user) return;
@@ -36,6 +37,22 @@ const AIMealPlanner = () => {
       toast({ title: "Generation failed", description: e.message, variant: "destructive" });
     }
   };
+
+  const handleSaveToDashboard = async () => {
+    if (!plan) return;
+    setSaving(true);
+    try {
+      await saveMealToDashboard(plan);
+      toast({ title: "Saved to Dashboard", description: "Your meal plan is now visible on the Dashboard." });
+    } catch (e) {
+      toast({ title: "Save failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const isSaved = savedMeal && plan &&
+    JSON.stringify(savedMeal.breakfast) === JSON.stringify(plan.breakfast);
 
   return (
     <div className="space-y-6">
@@ -113,6 +130,26 @@ const AIMealPlanner = () => {
               </div>
             </div>
           )}
+
+          <div className="flex justify-end">
+            <button
+              onClick={handleSaveToDashboard}
+              disabled={saving || isSaved}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition
+                ${isSaved
+                  ? "bg-safe-soft text-safe-text border border-safe/30 cursor-default"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                }`}
+            >
+              {saving ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</>
+              ) : isSaved ? (
+                <><BookmarkCheck className="h-4 w-4" /> Saved to Dashboard</>
+              ) : (
+                <><BookmarkCheck className="h-4 w-4" /> Save to Dashboard</>
+              )}
+            </button>
+          </div>
         </>
       )}
     </div>
