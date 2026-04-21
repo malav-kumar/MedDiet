@@ -54,11 +54,11 @@ const extractJson = (text) => {
  * @returns {Promise<object>} Parsed meal-plan JSON.
  */
 export const generateMealPlan = async ({ medicines, conditions, allergies }) => {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  // NOTE: Hardcoded for development testing. Move to a backend proxy for production.
+  const apiKey =
+    import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyCSyiYgjwQFUifIvCBr55i2VsgrvH1ow14";
   if (!apiKey) {
-    throw new Error(
-      "Missing VITE_GEMINI_API_KEY. Add it to your environment to enable AI generation."
-    );
+    throw new Error("Missing Gemini API key.");
   }
 
   const res = await fetch(ENDPOINT(apiKey), {
