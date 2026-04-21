@@ -6,7 +6,11 @@
  *
  * Set VITE_GEMINI_API_KEY in your environment to enable AI generation.
  */
+
 const MODEL = "gemini-3-flash";
+
+const MODEL = "gemini-3-flash-preview";
+
 const ENDPOINT = (key) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`;
 
@@ -61,12 +65,22 @@ export const generateMealPlan = async ({ medicines, conditions, allergies }) => 
       throw new Error("API Key not found. Please add VITE_GEMINI_API_KEY to your .env file.");
     }
 
-  const res = await fetch(ENDPOINT(apiKey), {
+ const res = await fetch(ENDPOINT(apiKey), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: [{ role: "user", parts: [{ text: buildUserPrompt({ medicines, conditions, allergies }) }] }],
+      contents: [{ 
+        role: "user", 
+        parts: [{ text: buildUserPrompt({ medicines, conditions, allergies }) }] 
+      }],
+      // MOVE safetySettings OUT OF generationConfig
+      safetySettings: [
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_ONLY_HIGH"
+        }
+      ],
       generationConfig: {
         temperature: 0.7,
         responseMimeType: "application/json",
