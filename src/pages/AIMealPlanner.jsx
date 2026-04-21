@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Salad, Sparkles, Loader2, Droplets, AlertTriangle, RefreshCw } from "lucide-react";
+import { Sparkles, Loader2, Droplets, RefreshCw } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "../services/firebase";
 import { useAuth } from "../context/AuthContext";
@@ -7,7 +7,6 @@ import { useHealth } from "../context/HealthContext";
 import { useMealPlan } from "../hooks/useMealPlan";
 import MealPlanCard from "../components/MealPlanCard";
 import AlertBanner from "../components/AlertBanner";
-import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 
 const SLOTS = ["breakfast", "lunch", "dinner", "snacks"];
@@ -17,7 +16,6 @@ const AIMealPlanner = () => {
   const { medicines, conditions } = useHealth();
   const [allergies, setAllergies] = useState([]);
 
-  // Pull allergies from profile so prompts are personalised.
   useEffect(() => {
     if (!isFirebaseConfigured || !user) return;
     (async () => {
@@ -35,11 +33,7 @@ const AIMealPlanner = () => {
       await generate();
       toast({ title: "Meal plan ready", description: "Saved to today's plan." });
     } catch (e) {
-      toast({
-        title: "Generation failed",
-        description: e.message,
-        variant: "destructive",
-      });
+      toast({ title: "Generation failed", description: e.message, variant: "destructive" });
     }
   };
 
@@ -47,14 +41,13 @@ const AIMealPlanner = () => {
     <div className="space-y-6">
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <Salad className="h-6 w-6 text-safe" /> AI Meal Planner
-          </h1>
+          <h1 className="text-2xl font-display font-bold text-foreground">AI Meal Planner</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Personalised, condition-aware full-day meal plans powered by Gemini.
+            Personalised, condition-aware full-day meal plans.
           </p>
         </div>
-        <Button onClick={handleGenerate} disabled={generating || loading} className="gap-2">
+        <button onClick={handleGenerate} disabled={generating || loading}
+          className="btn-primary inline-flex items-center gap-2">
           {generating ? (
             <><Loader2 className="h-4 w-4 animate-spin" /> Generating…</>
           ) : plan ? (
@@ -62,35 +55,35 @@ const AIMealPlanner = () => {
           ) : (
             <><Sparkles className="h-4 w-4" /> Generate plan</>
           )}
-        </Button>
+        </button>
       </header>
 
-      <section className="rounded-2xl border bg-card p-4 text-sm">
-        <p className="text-muted-foreground">
-          Using <span className="font-medium text-foreground">{medicines.length}</span> medicine
-          {medicines.length === 1 ? "" : "s"},{" "}
-          <span className="font-medium text-foreground">{conditions.length}</span> condition
-          {conditions.length === 1 ? "" : "s"}, and{" "}
-          <span className="font-medium text-foreground">{allergies.length}</span> allergy entr
-          {allergies.length === 1 ? "y" : "ies"}.
-        </p>
+      {/* Context banner */}
+      <section className="bg-primary-soft border border-primary/20 rounded-xl px-4 py-3 text-sm text-primary-text">
+        Using <span className="font-semibold">{medicines.length}</span> medicine{medicines.length === 1 ? "" : "s"},{" "}
+        <span className="font-semibold">{conditions.length}</span> condition{conditions.length === 1 ? "" : "s"}, and{" "}
+        <span className="font-semibold">{allergies.length}</span> allergy entr{allergies.length === 1 ? "y" : "ies"}.
       </section>
 
-      {error && (
-        <AlertBanner variant="warning">
-          <span className="font-medium">Couldn't generate plan:</span> {error}
+      {medicines.length === 0 && conditions.length === 0 && (
+        <AlertBanner variant="info" title="Personalise your plan">
+          Add at least one medicine or condition for safer, tailored meal suggestions.
         </AlertBanner>
+      )}
+
+      {error && (
+        <AlertBanner variant="error" title="Couldn't generate plan">{error}</AlertBanner>
       )}
 
       {loading && !plan && <SkeletonGrid />}
 
       {!loading && !plan && !generating && (
-        <div className="rounded-2xl border bg-gradient-to-br from-safe-soft via-card to-accent p-10 text-center">
-          <Sparkles className="h-10 w-10 text-primary mx-auto mb-3" />
-          <h2 className="text-lg font-semibold">No plan for today yet</h2>
-          <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
-            Tap <span className="font-medium">Generate plan</span> to get a full day of safe meals
-            tailored to your active medicines and conditions.
+        <div className="bg-card rounded-xl border border-dashed border-input p-8 text-center">
+          <div className="text-4xl mb-2" aria-hidden>🍽️</div>
+          <h2 className="font-display font-bold text-foreground">No meal plan for today</h2>
+          <p className="text-sm text-muted-foreground mt-1 mb-4 max-w-md mx-auto">
+            Tap <span className="font-semibold">Generate plan</span> to get a full day of safe meals
+            tailored to your active items.
           </p>
         </div>
       )}
@@ -98,31 +91,25 @@ const AIMealPlanner = () => {
       {plan && (
         <>
           {plan.warnings?.length > 0 && (
-            <div className="rounded-2xl border border-avoid/30 bg-avoid-soft p-4">
-              <div className="flex items-center gap-2 mb-2 text-avoid">
-                <AlertTriangle className="h-4 w-4" />
-                <h3 className="font-semibold text-sm uppercase tracking-wide">Warnings</h3>
-              </div>
-              <ul className="space-y-1 text-sm text-foreground">
-                {plan.warnings.map((w, i) => <li key={i}>• {w}</li>)}
-              </ul>
-            </div>
+            <AlertBanner variant="warning" title="Warnings">
+              {plan.warnings.join(" · ")}
+            </AlertBanner>
           )}
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             {SLOTS.map((slot) => (
               <MealPlanCard key={slot} slot={slot} data={plan[slot]} />
             ))}
           </div>
 
           {plan.hydration && (
-            <div className="rounded-2xl border bg-info-soft p-4 flex items-start gap-3">
-              <Droplets className="h-5 w-5 text-info mt-0.5 shrink-0" />
+            <div className="bg-info-soft border border-info/40 rounded-xl p-4 flex items-start gap-3">
+              <Droplets className="h-5 w-5 text-info-text mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs uppercase tracking-wide text-info font-semibold mb-1">
+                <p className="text-xs uppercase tracking-wide text-info-text font-semibold mb-1">
                   Hydration
                 </p>
-                <p className="text-sm">{plan.hydration}</p>
+                <p className="text-sm text-info-text">{plan.hydration}</p>
               </div>
             </div>
           )}
@@ -133,13 +120,13 @@ const AIMealPlanner = () => {
 };
 
 const SkeletonGrid = () => (
-  <div className="grid gap-4 md:grid-cols-2">
+  <div className="grid gap-4 sm:grid-cols-2">
     {SLOTS.map((s) => (
-      <div key={s} className="rounded-2xl border bg-card p-5 animate-pulse">
-        <div className="h-9 w-9 rounded-xl bg-muted mb-3" />
-        <div className="h-4 w-32 bg-muted rounded mb-2" />
-        <div className="h-3 w-full bg-muted rounded mb-1" />
-        <div className="h-3 w-2/3 bg-muted rounded" />
+      <div key={s} className="bg-card rounded-xl border border-border p-5 animate-pulse">
+        <div className="h-10 w-10 rounded-lg bg-secondary mb-3" />
+        <div className="h-4 w-32 bg-secondary rounded mb-2" />
+        <div className="h-3 w-full bg-secondary rounded mb-1" />
+        <div className="h-3 w-2/3 bg-secondary rounded" />
       </div>
     ))}
   </div>

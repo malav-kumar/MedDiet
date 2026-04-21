@@ -1,17 +1,18 @@
 /**
  * Color-coded food tag.
- * variant: "safe" | "avoid" | "caution" | "info"
+ * variant: "safe" | "avoid" | "caution" | "info" | "neutral"
  */
 const styles = {
-  safe: "bg-safe-soft text-safe border-safe/20",
-  avoid: "bg-avoid-soft text-avoid border-avoid/20",
-  caution: "bg-caution-soft text-caution border-caution/30",
-  info: "bg-info-soft text-info border-info/20",
+  safe: "bg-safe-soft text-safe-text border-safe/30",
+  avoid: "bg-avoid-soft text-avoid-text border-avoid/30",
+  caution: "bg-caution-soft text-caution-text border-caution/40",
+  info: "bg-info-soft text-info-text border-info/40",
+  neutral: "bg-secondary text-muted-foreground border-border",
 };
 
 const FoodTag = ({ children, variant = "info" }) => (
   <span
-    className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${styles[variant]}`}
+    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border capitalize ${styles[variant]}`}
   >
     {children}
   </span>

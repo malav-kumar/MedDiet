@@ -1,68 +1,76 @@
 import { memo } from "react";
-import { HeartPulse, Plus, Trash2 } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import FoodTag from "./FoodTag";
 
-const Section = ({ title, items, variant }) =>
+const Section = ({ title, items, variant, dotClass }) =>
   items?.length ? (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
+        <span className={`inline-block w-1.5 h-1.5 rounded-full ${dotClass}`} />
         {title}
       </p>
-      <div className="flex flex-wrap gap-1.5">
-        {items.map((f) => (
-          <FoodTag key={f} variant={variant}>{f}</FoodTag>
-        ))}
+      <div className="flex flex-wrap gap-2">
+        {items.map((f) => <FoodTag key={f} variant={variant}>{f}</FoodTag>)}
       </div>
     </div>
   ) : null;
 
 const ConditionCard = ({ condition, isActive, onAdd, onRemove }) => (
-  <article className="rounded-2xl border bg-card p-5 shadow-sm hover:shadow-md transition">
-    <header className="flex items-start justify-between gap-3 mb-4">
-      <div className="flex gap-3">
-        <div className="h-10 w-10 rounded-xl bg-info/10 text-info flex items-center justify-center">
-          <HeartPulse className="h-5 w-5" />
-        </div>
-        <div>
-          <h3 className="font-semibold text-card-foreground">{condition.condition}</h3>
-          {condition.medicines?.length > 0 && (
-            <p className="text-xs text-muted-foreground">
-              Common meds: {condition.medicines.join(", ")}
-            </p>
-          )}
-        </div>
-      </div>
+  <article className="bg-card rounded-xl border border-border overflow-hidden">
+    {/* Teal header */}
+    <header className="bg-primary px-5 py-4 flex items-center justify-between gap-3">
+      <h3 className="font-display font-bold text-primary-foreground capitalize">{condition.condition}</h3>
       {isActive ? (
         <button
           type="button"
           onClick={() => onRemove?.(condition.id)}
-          className="inline-flex items-center gap-1 rounded-full bg-avoid-soft text-avoid px-3 py-1.5 text-xs font-medium hover:bg-avoid hover:text-avoid-foreground transition"
+          className="text-primary-text bg-card hover:bg-primary-soft px-3 py-1.5 rounded-lg text-xs font-semibold transition inline-flex items-center gap-1"
         >
-          <Trash2 className="h-3.5 w-3.5" /> Remove
+          <X className="h-3.5 w-3.5" /> Remove
         </button>
       ) : (
         <button
           type="button"
           onClick={() => onAdd?.(condition)}
-          className="inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground px-3 py-1.5 text-xs font-medium hover:opacity-90 transition"
+          className="text-primary-text bg-card hover:bg-primary-soft px-3 py-1.5 rounded-lg text-xs font-semibold transition inline-flex items-center gap-1"
         >
-          <Plus className="h-3.5 w-3.5" /> Set active
+          <Plus className="h-3.5 w-3.5" /> Add
         </button>
       )}
     </header>
 
-    <div className="space-y-3">
-      <Section title="Recommended" items={condition.recommended} variant="safe" />
-      <Section title="Avoid" items={condition.avoid} variant="avoid" />
-    </div>
+    <div className="p-5 space-y-4">
+      {condition.medicines?.length > 0 && (
+        <p className="text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">Common meds: </span>
+          <span className="capitalize">{condition.medicines.join(", ")}</span>
+        </p>
+      )}
 
-    {condition.dietaryNotes?.length > 0 && (
-      <ul className="mt-4 border-t pt-3 space-y-1">
-        {condition.dietaryNotes.map((n) => (
-          <li key={n} className="text-xs text-muted-foreground leading-relaxed">• {n}</li>
-        ))}
-      </ul>
-    )}
+      <Section title="Recommended" items={condition.recommended} variant="safe" dotClass="bg-safe" />
+      <Section title="Avoid" items={condition.avoid} variant="avoid" dotClass="bg-avoid" />
+
+      {condition.dietaryNotes?.length > 0 && (
+        <>
+          <hr className="border-slate-100" />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+              Recovery Tips
+            </p>
+            <ul className="space-y-2">
+              {condition.dietaryNotes.map((n, i) => (
+                <li key={n} className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-primary-soft text-primary-text text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm text-muted-foreground leading-relaxed">{n}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
+      )}
+    </div>
   </article>
 );
 

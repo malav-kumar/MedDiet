@@ -1,86 +1,70 @@
-import { Pill, HeartPulse, Salad, User, Sun, Moon, Sunrise } from "lucide-react";
+import { Pill, HeartPulse, Salad, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import QuickActionCard from "../components/QuickActionCard";
 import AlertBanner from "../components/AlertBanner";
-import FoodTag from "../components/FoodTag";
 import { useAuth } from "../context/AuthContext";
 import { useHealth } from "../context/HealthContext";
-
-const greeting = () => {
-  const h = new Date().getHours();
-  if (h < 12) return { text: "Good morning", Icon: Sunrise };
-  if (h < 18) return { text: "Good afternoon", Icon: Sun };
-  return { text: "Good evening", Icon: Moon };
-};
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { medicines, conditions, combinedRules } = useHealth();
-  const { text, Icon } = greeting();
-  const today = new Date().toLocaleDateString(undefined, {
-    weekday: "long", month: "long", day: "numeric",
-  });
   const name = user?.displayName || user?.email?.split("@")[0] || "there";
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-2xl border bg-gradient-to-br from-primary/10 via-card to-accent p-6">
-        <p className="text-sm text-muted-foreground">{today}</p>
-        <h1 className="text-2xl md:text-3xl font-semibold mt-1 flex items-center gap-2">
-          <Icon className="h-6 w-6 text-primary" /> {text}, {name}.
+    <div className="space-y-6">
+      <header>
+        <h1 className="text-2xl font-display font-bold text-foreground">
+          Welcome back, <span className="capitalize">{name}</span>
         </h1>
-        <p className="text-muted-foreground mt-2 max-w-xl">
-          Smart diet guidance based on your medicines and conditions — so every meal supports your treatment.
+        <p className="text-sm text-muted-foreground mt-1">
+          Smart diet guidance based on your medicines and conditions.
         </p>
-      </section>
+      </header>
 
       {(combinedRules.avoid.length > 0 || combinedRules.caution.length > 0) && (
-        <AlertBanner>
-          Based on your active items, watch out for:{" "}
-          <span className="font-medium">
-            {[...combinedRules.avoid, ...combinedRules.caution].slice(0, 6).join(", ")}
-            {combinedRules.avoid.length + combinedRules.caution.length > 6 ? "…" : ""}
-          </span>
+        <AlertBanner variant="warning" title="Watch out for these foods today">
+          {[...combinedRules.avoid, ...combinedRules.caution].slice(0, 6).join(", ")}
+          {combinedRules.avoid.length + combinedRules.caution.length > 6 ? "…" : ""}
         </AlertBanner>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <SummaryCard
-          icon={Pill} title="Active medicines" count={medicines.length}
-          linkTo="/medicines" linkLabel="Manage"
-          empty="No medicines added yet."
+      {/* Stats row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <StatCard label="Meal Plans" value="0" />
+        <PillStatCard
+          label="Active Medicines"
           items={medicines.map((m) => m.medicine)}
+          tagClass="bg-primary-soft text-primary-text"
         />
-        <SummaryCard
-          icon={HeartPulse} title="Active conditions" count={conditions.length}
-          linkTo="/conditions" linkLabel="Manage"
-          empty="No conditions added yet."
+        <PillStatCard
+          label="Active Conditions"
           items={conditions.map((c) => c.condition)}
+          tagClass="bg-safe-soft text-safe-text"
         />
       </div>
 
-      {(combinedRules.safe.length > 0 || combinedRules.avoid.length > 0) && (
-        <section className="rounded-2xl border bg-card p-5">
-          <h2 className="font-semibold mb-4">Combined food guidance</h2>
-          <div className="grid gap-4 md:grid-cols-3">
-            <TagGroup title="Safe" items={combinedRules.safe} variant="safe" />
-            <TagGroup title="Avoid" items={combinedRules.avoid} variant="avoid" />
-            <TagGroup title="Caution" items={combinedRules.caution} variant="caution" />
-          </div>
-        </section>
-      )}
+      {/* Today's plan empty state */}
+      <section className="bg-card rounded-xl border border-dashed border-input p-8 text-center">
+        <div className="text-4xl mb-2" aria-hidden>🍽️</div>
+        <h3 className="font-display font-bold text-foreground">No meal plan for today</h3>
+        <p className="text-sm text-muted-foreground mt-1 mb-4">
+          Generate a personalised plan based on your active items.
+        </p>
+        <Link to="/meals" className="inline-flex btn-primary">Generate Meal Plan</Link>
+      </section>
 
+      {/* Quick actions */}
       <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">
-          Quick actions
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+          Quick Actions
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <QuickActionCard to="/medicines" icon={Pill} accent="primary"
-            title="Medicine checker" description="Find safe foods for your meds." />
-          <QuickActionCard to="/conditions" icon={HeartPulse} accent="info"
-            title="Condition guide" description="Diet rules for 30+ conditions." />
-          <QuickActionCard to="/meals" icon={Salad} accent="safe"
-            title="AI meal planner" description="Coming next: full-day plans." />
+            title="Medicine Checker" description="Find safe foods for your meds." />
+          <QuickActionCard to="/conditions" icon={HeartPulse} accent="safe"
+            title="Condition Guide" description="Diet rules for 30+ conditions." />
+          <QuickActionCard to="/meals" icon={Salad} accent="info"
+            title="AI Meal Planner" description="Full-day plans, tailored to you." />
           <QuickActionCard to="/profile" icon={User} accent="caution"
             title="Profile" description="Allergies & medical history." />
         </div>
@@ -89,45 +73,33 @@ const Dashboard = () => {
   );
 };
 
-const SummaryCard = ({ icon: Icon, title, count, items, linkTo, linkLabel, empty }) => (
-  <article className="rounded-2xl border bg-card p-5 shadow-sm">
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-2">
-        <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary grid place-items-center">
-          <Icon className="h-4 w-4" />
-        </div>
-        <h3 className="font-semibold">{title}</h3>
-      </div>
-      <span className="text-sm text-muted-foreground">{count}</span>
-    </div>
-    {items.length === 0 ? (
-      <p className="text-sm text-muted-foreground">{empty}</p>
-    ) : (
-      <ul className="space-y-1.5">
-        {items.slice(0, 4).map((i) => (
-          <li key={i} className="text-sm text-foreground">• {i}</li>
-        ))}
-        {items.length > 4 && (
-          <li className="text-xs text-muted-foreground">+ {items.length - 4} more</li>
-        )}
-      </ul>
-    )}
-    <Link to={linkTo} className="mt-4 inline-block text-sm font-medium text-primary hover:underline">
-      {linkLabel} →
-    </Link>
-  </article>
+const StatCard = ({ label, value }) => (
+  <div className="bg-card rounded-xl border border-border p-4 hover:border-primary/40 hover:shadow-sm transition">
+    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+    <p className="font-display font-bold text-2xl text-foreground mt-1">{value}</p>
+  </div>
 );
 
-const TagGroup = ({ title, items, variant }) => (
-  <div>
-    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{title}</p>
+const PillStatCard = ({ label, items, tagClass }) => (
+  <div className="bg-card rounded-xl border border-border p-4 hover:border-primary/40 hover:shadow-sm transition">
+    <div className="flex items-center justify-between mb-2">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      <span className="text-xs text-muted-foreground">{items.length}</span>
+    </div>
     {items.length === 0 ? (
-      <p className="text-sm text-muted-foreground">—</p>
+      <p className="text-sm text-slate-400">None yet</p>
     ) : (
       <div className="flex flex-wrap gap-1.5">
-        {items.slice(0, 12).map((i) => (
-          <FoodTag key={i} variant={variant}>{i}</FoodTag>
+        {items.slice(0, 3).map((i) => (
+          <span key={i} className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize truncate max-w-[110px] ${tagClass}`}>
+            {i}
+          </span>
         ))}
+        {items.length > 3 && (
+          <span className="bg-secondary text-muted-foreground text-xs font-medium px-2 py-0.5 rounded-full">
+            +{items.length - 3}
+          </span>
+        )}
       </div>
     )}
   </div>

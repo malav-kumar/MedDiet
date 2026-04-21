@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { AuthProvider } from "../context/AuthContext";
 import { HealthProvider } from "../context/HealthContext";
-import Navbar from "../components/Navbar";
+import AppShell from "../components/AppShell";
 import PrivateRoute from "../components/PrivateRoute";
 import Login from "./Login";
 import Signup from "./Signup";
@@ -21,12 +21,7 @@ const PageFallback = () => (
   </div>
 );
 
-const Shell = ({ children }) => (
-  <div className="min-h-screen bg-background">
-    <Navbar />
-    <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
-  </div>
-);
+const Shell = ({ children }) => <AppShell>{children}</AppShell>;
 
 const App = () => (
   <AuthProvider>

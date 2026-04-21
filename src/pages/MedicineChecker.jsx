@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Pill, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { toast } from "sonner";
 import MedicineCard from "../components/MedicineCard";
 import { useMedicine } from "../hooks/useMedicine";
@@ -25,50 +25,59 @@ const MedicineChecker = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold flex items-center gap-2">
-          <Pill className="h-6 w-6 text-primary" /> Medicine Checker
-        </h1>
+        <h1 className="text-2xl font-display font-bold text-foreground">Medicine Checker</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Search a medicine to see foods that are safe, to avoid, or to use with caution.
         </p>
       </header>
 
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search e.g. Paracetamol, Metformin…"
-          className="w-full rounded-2xl border bg-card pl-11 pr-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-        />
-      </div>
-
       {active.length > 0 && (
-        <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">
-            Your active medicines
-          </h2>
-          <div className="grid gap-4 md:grid-cols-2">
+        <section className="bg-primary-soft border border-primary/20 rounded-xl px-4 py-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary-text mb-2">
+            Active medicines
+          </p>
+          <div className="flex flex-wrap gap-2">
             {active.map((m) => (
-              <MedicineCard key={m.id} medicine={m} isActive onRemove={handleRemove} />
+              <span key={m.id}
+                className="inline-flex items-center gap-1.5 bg-card border border-primary/30 text-primary-text text-sm font-medium px-3 py-1 rounded-full capitalize">
+                {m.medicine}
+                <button type="button" onClick={() => handleRemove(m.id)}
+                  className="text-slate-400 hover:text-avoid transition leading-none" aria-label="Remove">
+                  ×
+                </button>
+              </span>
             ))}
           </div>
         </section>
       )}
 
+      <div className="relative">
+        <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+          <Search className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <input
+          ref={inputRef}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search e.g. Paracetamol, Metformin…"
+          className="w-full pl-10 pr-4 py-3 border border-input rounded-xl text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition"
+        />
+      </div>
+
       <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
           {query ? `Results (${results.length})` : "All medicines"}
-        </h2>
+        </p>
         {results.length === 0 ? (
-          <div className="rounded-2xl border bg-card p-10 text-center">
-            <p className="text-muted-foreground">No medicines match "{query}".</p>
+          <div className="bg-card rounded-xl border border-dashed border-input p-8 text-center">
+            <div className="text-4xl mb-2" aria-hidden>💊</div>
+            <h3 className="font-display font-bold text-foreground">Search for a medicine</h3>
+            <p className="text-sm text-muted-foreground mt-1">Try: warfarin, metformin…</p>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             {results.map((m) => (
               <MedicineCard
                 key={m.id} medicine={m}
