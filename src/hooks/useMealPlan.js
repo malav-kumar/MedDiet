@@ -1,18 +1,29 @@
 import { useCallback, useEffect, useState } from "react";
-import { getTodayMealPlan } from "../services/mealService";
+import { getTodayMealPlan, saveMealPlan } from "../services/mealService";
+import { generateMealPlan } from "../services/geminiService";
 import { useAuth } from "../context/AuthContext";
+import { useHealth } from "../context/HealthContext";
 
-/** Phase 1: read-only access to today's meal plan if one exists. */
-export const useMealPlan = () => {
+/**
+ * Loads today's meal plan and exposes a `generate()` action that calls Gemini
+ * and persists the result to Firestore.
+ */
+export const useMealPlan = (allergies = []) => {
   const { user } = useAuth();
+  const { medicines, conditions } = useHealth();
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState(null);
 
   const refresh = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     try {
-      setPlan(await getTodayMealPlan(user.uid));
+      const existing = await getTodayMealPlan(user.uid);
+      setPlan(existing);
+    } catch (e) {
+      setError(e.message);
     } finally {
       setLoading(false);
     }
@@ -20,5 +31,21 @@ export const useMealPlan = () => {
 
   useEffect(() => { refresh(); }, [refresh]);
 
-  return { plan, loading, refresh };
+  const generate = useCallback(async () => {
+    if (!user) return;
+    setGenerating(true);
+    setError(null);
+    try {
+      const fresh = await generateMealPlan({ medicines, conditions, allergies });
+      await saveMealPlan(user.uid, fresh);
+      setPlan({ ...fresh, generatedAt: new Date() });
+    } catch (e) {
+      setError(e.message);
+      throw e;
+    } finally {
+      setGenerating(false);
+    }
+  }, [user, medicines, conditions, allergies]);
+
+  return { plan, loading, generating, error, generate, refresh };
 };

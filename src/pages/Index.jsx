@@ -1,15 +1,25 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { AuthProvider } from "../context/AuthContext";
 import { HealthProvider } from "../context/HealthContext";
 import Navbar from "../components/Navbar";
 import PrivateRoute from "../components/PrivateRoute";
 import Login from "./Login";
 import Signup from "./Signup";
-import Dashboard from "./Dashboard";
-import MedicineChecker from "./MedicineChecker";
-import ConditionGuide from "./ConditionGuide";
-import AIMealPlanner from "./AIMealPlanner";
-import Profile from "./Profile";
+
+// Lazy-loaded pages keep the auth bundle small.
+const Dashboard = lazy(() => import("./Dashboard"));
+const MedicineChecker = lazy(() => import("./MedicineChecker"));
+const ConditionGuide = lazy(() => import("./ConditionGuide"));
+const AIMealPlanner = lazy(() => import("./AIMealPlanner"));
+const Profile = lazy(() => import("./Profile"));
+
+const PageFallback = () => (
+  <div className="flex items-center justify-center py-20 text-muted-foreground">
+    <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading…
+  </div>
+);
 
 const Shell = ({ children }) => (
   <div className="min-h-screen bg-background">
@@ -29,14 +39,16 @@ const App = () => (
           element={
             <PrivateRoute>
               <Shell>
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/medicines" element={<MedicineChecker />} />
-                  <Route path="/conditions" element={<ConditionGuide />} />
-                  <Route path="/meals" element={<AIMealPlanner />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
+                <Suspense fallback={<PageFallback />}>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/medicines" element={<MedicineChecker />} />
+                    <Route path="/conditions" element={<ConditionGuide />} />
+                    <Route path="/meals" element={<AIMealPlanner />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Suspense>
               </Shell>
             </PrivateRoute>
           }
