@@ -7,8 +7,6 @@
  * Set VITE_GEMINI_API_KEY in your environment to enable AI generation.
  */
 
-const MODEL = "gemini-3-flash";
-
 const MODEL = "gemini-3-flash-preview";
 
 const ENDPOINT = (key) =>
