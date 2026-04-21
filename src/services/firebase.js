@@ -1,27 +1,21 @@
 /**
- * Firebase initialization.
- *
- * IMPORTANT: Replace the placeholder values below with your own Firebase
- * web-app config from Firebase Console → Project settings → Your apps.
- *
- * The app will run without these (Auth pages will show a friendly error)
- * so you can preview the UI immediately.
+ * Firebase initialization for MedDiet Advisor.
  */
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "REPLACE_WITH_YOUR_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
-  projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_YOUR_BUCKET",
-  messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_APP_ID",
+  apiKey: "AIzaSyAknuLE0gFdEGLJ1ISbY5AuOPJsakLbFmI",
+  authDomain: "meddiet-e3d55.firebaseapp.com",
+  projectId: "meddiet-e3d55",
+  storageBucket: "meddiet-e3d55.firebasestorage.app",
+  messagingSenderId: "439186844255",
+  appId: "1:439186844255:web:2db65ab0d97ba03a3789ea",
+  measurementId: "G-TWY2HRCDFR",
 };
 
-export const isFirebaseConfigured =
-  !firebaseConfig.apiKey.startsWith("REPLACE_");
+export const isFirebaseConfigured = !firebaseConfig.apiKey.startsWith("REPLACE_");
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
