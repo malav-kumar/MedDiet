@@ -6,7 +6,7 @@
  *
  * Set VITE_GEMINI_API_KEY in your environment to enable AI generation.
  */
-const MODEL = "gemini-1.5-flash-latest";
+const MODEL = "gemini-3-flash";
 const ENDPOINT = (key) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`;
 
@@ -55,11 +55,11 @@ const extractJson = (text) => {
  */
 export const generateMealPlan = async ({ medicines, conditions, allergies }) => {
   // NOTE: Hardcoded for development testing. Move to a backend proxy for production.
-  const apiKey =
-    import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyCSyiYgjwQFUifIvCBr55i2VsgrvH1ow14";
-  if (!apiKey) {
-    throw new Error("Missing Gemini API key.");
-  }
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY; 
+  
+    if (!apiKey) {
+      throw new Error("API Key not found. Please add VITE_GEMINI_API_KEY to your .env file.");
+    }
 
   const res = await fetch(ENDPOINT(apiKey), {
     method: "POST",
